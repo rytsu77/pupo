@@ -34,7 +34,6 @@ input[type=file]{position:absolute;opacity:0;width:0;height:0}
 <div class="msg" id="msg"></div>
 <div class="bar">
   <button id="music" aria-pressed="false">Activar música</button>
-  <label class="btn">Usar mi canción<input type="file" id="file" accept="audio/*"></label>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -285,7 +284,7 @@ const clock=new THREE.Clock();
 })();
 
 // ---------- Música ----------
-let ctx,master,timer,playing=false,custom=null;const btn=document.getElementById('music');
+let ctx,master,timer,playing=false,custom=new Audio('cancion.mp3');custom.loop=true;custom.preload='auto';const btn=document.getElementById('music');
 function startSynth(){
   ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
   master=ctx.createGain();master.gain.value=.16;master.connect(ctx.destination);
@@ -301,12 +300,6 @@ btn.onclick=()=>{
   if(playing){stopAll();playing=false}
   else{ if(custom)custom.play();else startSynth();playing=true}
   btn.textContent=playing?'Silenciar música':'Activar música';btn.setAttribute('aria-pressed',playing);
-};
-document.getElementById('file').onchange=e=>{
-  const f=e.target.files[0];if(!f)return;stopAll();
-  if(custom)URL.revokeObjectURL(custom.src);
-  custom=new Audio(URL.createObjectURL(f));custom.loop=true;custom.play();playing=true;
-  btn.textContent='Silenciar música';btn.setAttribute('aria-pressed',true);
 };
 })();
 </script>
