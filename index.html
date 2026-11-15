@@ -273,4 +273,35 @@ const clock=new THREE.Clock();
   flowers.forEach(f=>{const k=reduce?1:sm(f.d,f.d+2.4,t);f.g.scale.setScalar(Math.max(.001,k));f.s.material.opacity=(reduce?.45:sm(4.5,8,t)*.45)*(.85+.15*Math.sin(t*1.6+f.d));f.s.scale.setScalar(3.4*Math.max(.2,k))});
   const fk=reduce?1:sm(3.2,7,t),wk=reduce?0:1-sm(5,8.5,t),fs=reduce?1:sm(1,4.5,t),ws=reduce?0:1-sm(3,6,t);
   const h=reduce?9:-2.6+5.8*sm(.2,4.6,t);bouquet.updateMatrixWorld(true);clipW.set(new Vector3(0,-1,0),h).applyMatrix4(bouquet.matrixWorld);
-  leaves.forEach(L=>L.m.scale.set
+  leaves.forEach(L=>L.m.scale.setScalar(reduce?1:Math.max(.001,sm(0,.5,h-L.y))));budMat.emissiveIntensity=.25+.2*Math.sin(t*2.2);buds.forEach(B=>{const gk=reduce?1:sm(0,.5,h-B.y-.3),ok=B.open?sm(0,.7,t-B.tt):0;B.m.scale.setScalar(Math.max(.001,gk*(1-ok)))});
+  petalMat.transparent=fk<.999;petalMat.opacity=fk;[leafMat,stemMat,budMat].forEach(m=>{m.transparent=fs<.999;m.opacity=fs});
+  wireP.opacity=.55*wk;wireG.opacity=wireS.opacity=.55*ws;wireP.visible=wk>.01;wireG.visible=wireS.visible=ws>.01;
+  const a=pg.attributes.position;
+  for(let i=0;i<N;i++){let yv=a.getY(i)+.003;if(yv>3)yv=-3;a.setY(i,yv);a.setX(i,a.getX(i)+Math.sin(t+ph[i])*.0015)}
+  a.needsUpdate=true;glow.intensity=.8+.3*Math.sin(t*1.6);
+  petalsUpdate(t);starsUpdate(t);
+  renderer.render(scene,camera);
+})();
+
+// ---------- Música ----------
+let ctx,master,timer,playing=false,custom=new Audio('cancion.mp3');custom.loop=true;custom.preload='auto';const btn=document.getElementById('music');
+function startSynth(){
+  ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
+  master=ctx.createGain();master.gain.value=.16;master.connect(ctx.destination);
+  const chords=[[220,261.6,329.6],[174.6,220,261.6],[261.6,329.6,392],[196,246.9,293.7]],pent=[523.3,587.3,659.3,784,880,1046.5];let n=0;
+  const tone=(f,dur,vol,type)=>{const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime;o.type=type;o.frequency.value=f;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+dur*.3);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.1)};
+  const step=()=>{ if(n%5===0)chords[(n/5)%4|0].forEach(f=>tone(f,6.5,.35,'sine'));
+    if(n%5!==0||Math.random()<.5)tone(pent[Math.random()*pent.length|0],2.4,.22,'triangle');n++};
+  step();timer=setInterval(step,1300);
+}
+function stopAll(){clearInterval(timer);if(master){master.disconnect();master=null}if(custom)custom.pause()}
+btn.onclick=()=>{
+  if(playing){stopAll();playing=false}
+  else{ if(custom)custom.play();else startSynth();playing=true}
+  btn.textContent=playing?'Silenciar música':'Activar música';btn.setAttribute('aria-pressed',playing);
+};
+})();
+</script>
+</body>
+</html>
